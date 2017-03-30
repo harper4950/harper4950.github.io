@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script type="text/javascript" src="js/jquery-1.12.4.js"></script>
+		<script type="text/javascript" src="js/tools.js"></script>
+		<style type="text/css">
+			*{
+				padding:0;
+				margin: 0;
+			}
+			li{
+				list-style: none;
+				position: absolute;
+				border: 5px solid #000;
+				z-index: 1;
+			}
+			#box{
+				position: relative;
+				width: 720px;
+				height: 400px;
+				margin: 20px;
+			}
+			input{
+				width: 100px;
+				height: 50px;
+				position: relative;
+				top: 10px;
+				left:300px;
+				color:#f60;
+				font-size: 30px;
+			}
+			.bor{
+				border: 5px dashed #ff0000;
+			}
+			#wrap{
+				width: 730px;
+				padding: 20px;
+				border: 5px solid #f60;
+				margin: 0 auto;
+				border-radius:20px;	
+				background: #333;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="wrap">
+			<ul id="box">
+				<li ><img src="img/1.jpg"/></li>
+				<li ><img src="img/2.jpg"/></li>
+				<li ><img src="img/3.jpg"/></li>
+				<li ><img src="img/1.jpg"/></li>
+				<li ><img src="img/2.jpg"/></li>
+				<li ><img src="img/3.jpg"/></li>
+				<li ><img src="img/1.jpg"/></li>
+				<li ><img src="img/2.jpg"/></li>
+				<li ><img src="img/3.jpg"/></li>
+				<li ><img src="img/1.jpg"/></li>
+				<li ><img src="img/2.jpg"/></li>
+				<li ><img src="img/3.jpg"/></li>
+			</ul>
+			<input type="button" value="打乱" />
+		</div>
+		
+		
+		<script type="text/javascript">
+			var arr =[];	//空数组，用来存放每个li的定位
+			var num =1;		//层级变量
+			$("li").each(function(i,ele){
+				$(ele).css({	//动态设置每个li的定位
+					"top" :Math.floor(i/4)*130,
+					"left" :i%4*180
+				})
+				arr[i] ={	//把每个li的定位位置添加到数组中
+					top:Math.floor(i/4)*130,
+					left :i%4*180
+				}
+			})
+			$("input").on("click",function(){	//点击打乱按钮
+				arr.sort(function(a,b){return Math.random()-0.5});	//随机打乱数组
+				$("li").each(function(i,ele){
+					$(ele).stop().animate({	 //每个li的位置根据打乱后的数组重新定位
+						"top":arr[i].top,
+						"left":arr[i].left
+					},300)	//运动时间
+				})
+			})
+			$('li').on('mousedown',function(ev){	//鼠标按下
+				var minObj =null;	//空变量，存放碰撞到最近的一个元素
+				num++;	//层级增加
+				var that =this;	
+				var disx = ev.pageX - $(this).position().left;  //获取当前元素离可视区的left位置	
+				var disy = ev.pageY - $(this).position().top;	//获取当前元素离可视区的top位置	
+				$(that).css({	
+					zIndex:num	//设置当前层级最高
+				})
+				$(document).on('mousemove',function(ev){		//鼠标按下事件
+					var arr2 =[];	//空数组，存放碰撞到的元素
+					var min =Infinity;	//正无穷，用来判断最小的数
+					$.each($("li"),function(i,ele){
+						var on = coll(that,ele);	//判断碰撞
+						if(on&&that!=ele){	
+							arr2.push(ele)	//把碰撞到的元素添加到arr2数组中
+						}
+					})
+					$.each(arr2, function(i,ele) {	
+						var x =that.offsetLeft-ele.offsetLeft;	//获取当前元素和碰撞元素的left差距
+						var y =that.offsetTop-ele.offsetTop;	//获取当前元素和碰撞元素的top差距
+						var sqrt =Math.sqrt(Math.pow(x,2)+Math.pow(y,2));	//计算出当前和碰撞元素的斜边长度
+						if(sqrt<min){	//判断最短的斜边距离
+							min=sqrt
+							minObj =ele;	//把碰撞到的最近元素赋值给minObj
+						}
+					});
+					$(minObj).addClass('bor').siblings('li').removeClass('bor');//碰撞到的最近元素添加边框
+					var l = ev.pageX - disx;	//鼠标在document中的位置
+					var t = ev.pageY - disy;				
+					$(that).css({	//设置点击元素的位置（拖拽）
+						left:l,
+						top:t
+					})	
+				})				
+				$(document).on('mouseup',function(){	//鼠标抬起解除事件					
+					$(document).off();	//解除document的所有绑定事件
+					if(minObj){	//判断是否有碰到元素
+						var jh=arr[$(minObj).index()];
+						arr[$(minObj).index()]=arr[$(that).index()];
+						arr[$(that).index()]=jh;
+					}
+					$("li").each(function(i,ele){
+						$(ele).removeClass("bor");
+						$(ele).stop().animate({
+							"top":arr[i].top,
+							"left":arr[i].left
+						},300)	
+					})
+				})
+				return false;	//消除默认行为
+			})
+		</script>
+	</body>
+</html>

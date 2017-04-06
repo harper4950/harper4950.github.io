@@ -10,9 +10,10 @@
 				height:460px;
 				border:1px solid #272c3d;
 				margin: 100px auto;
-				background: #272c3d;
+				background: #8A6D3B;
 				padding: 20px;
 				box-shadow: 5px 5px 10px #000;
+				border-radius:20px;
 			}
 			span:hover{
 				cursor: pointer;
